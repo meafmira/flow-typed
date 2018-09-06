@@ -900,36 +900,52 @@ declare module "react-apollo" {
 
   declare export function cleanupApolloState(apolloState: any): void;
 
+  declare export type RenderPropsUtils<TData, TVariables> = {|
+    variables: TVariables,
+    networkStatus: NetworkStatus,
+    refetch: (variables?: TVariables) => Promise<ApolloQueryResult<TData>>,
+    fetchMore: ((
+      options: FetchMoreOptions<TData, TVariables> &
+        FetchMoreQueryOptions<TVariables>,
+    ) => Promise<ApolloQueryResult<TData>>) &
+      (<TData2, TVariables2>(
+        options: { query: DocumentNode } & FetchMoreQueryOptions<TVariables2> &
+          FetchMoreOptions<TData2, TVariables2>,
+      ) => Promise<ApolloQueryResult<TData2>>),
+    load: () => void,
+    startPolling: (interval: number) => void,
+    stopPolling: () => void,
+    subscribeToMore: (
+      options: SubscribeToMoreOptions<TData, any, any>,
+    ) => () => void,
+    updateQuery: (
+      mapFn: (
+        previousResult: TData,
+        options: { variables: TVariables },
+      ) => TData,
+    ) => mixed,
+    client: ApolloClient<any>,
+  |};
+
   declare export type QueryRenderProps<
     TData = any,
     TVariables = OperationVariables
   > = {
-    data: TData | {||} | void,
-    loading: boolean,
-    error?: ApolloError,
-    variables: TVariables,
-    networkStatus: NetworkStatus,
-    refetch: (variables?: TVariables) => Promise<mixed>,
-    fetchMore: ((
-      options: FetchMoreOptions<TData, TVariables> &
-        FetchMoreQueryOptions<TVariables>
-    ) => Promise<ApolloQueryResult<TData>>) &
-      (<TData2, TVariables2>(
-        options: { query: DocumentNode } & FetchMoreQueryOptions<TVariables2> &
-          FetchMoreOptions<TData2, TVariables2>
-      ) => Promise<ApolloQueryResult<TData2>>),
-    load: () => void,
-    startPolling: (interval: number) => void,
-    stopPolling: (interval: number) => void,
-    subscribeToMore: (
-      options: SubscribeToMoreOptions<TData, any, any>
-    ) => () => void,
-    updateQuery: (
-      previousResult: TData,
-      options: { variables: TVariables }
-    ) => TData,
-    client: ApolloClient<any>
-  };
+      data: TData,
+      loading: false,
+      error?: void,
+      ...RenderPropsUtils<TData, TVariables>
+    } | {
+      data: {||} | void,
+      loading: false,
+      error: ApolloError,
+      ...RenderPropsUtils<TData, TVariables>
+    } | {
+      data: {||} | void,
+      loading: true,
+      error?: void,
+      ...RenderPropsUtils<TData, TVariables>
+    };
 
   declare export type QueryRenderPropFunction<TData, TVariables> = (
     QueryRenderProps<TData, TVariables>
